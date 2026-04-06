@@ -17,15 +17,15 @@ SUPPORTED_MEASURES = [
 NOCUTOFF_MEASURES = {'NRBP', 'nNRBP', 'MAP-IA'}
 
 DEFAULT_MEASURES = [
-    'ERR-IA@5', 'ERR-IA@10', 'ERR-IA@20',
-    'nERR-IA@5', 'nERR-IA@10', 'nERR-IA@20',
-    'alpha-DCG@5', 'alpha-DCG@10', 'alpha-DCG@20',
-    'alpha-nDCG@5', 'alpha-nDCG@10', 'alpha-nDCG@20',
+    'ERR-IA@5', 'ERR-IA@10', 'ERR-IA@20','ERR-IA@50','ERR-IA@100',
+    'nERR-IA@5', 'nERR-IA@10', 'nERR-IA@20','nERR-IA@50','nERR-IA@100',
+    'alpha-DCG@5', 'alpha-DCG@10', 'alpha-DCG@20','alpha-DCG@50','alpha-DCG@100',
+    'alpha-nDCG@5', 'alpha-nDCG@10', 'alpha-nDCG@20','alpha-nDCG@50','alpha-nDCG@100',
     'NRBP',
     'nNRBP',
     'MAP-IA',
-    'P-IA@5', 'P-IA@10', 'P-IA@20',
-    'strec@5', 'strec@10', 'strec@20',
+    'P-IA@5', 'P-IA@10', 'P-IA@20','P-IA@50','P-IA@100',
+    'strec@5', 'strec@10', 'strec@20','strec@50','strec@100',
 ]
 
 
@@ -61,7 +61,7 @@ class RelevanceEvaluator:
         else:
             measures = list(measures)
         self.measures_arg = []
-        max_cutoff = 20
+        max_cutoff = 100
         for measure in measures:
             if '@' in measure:
                 assert measure not in NOCUTOFF_MEASURES
@@ -73,7 +73,7 @@ class RelevanceEvaluator:
                 assert measure in NOCUTOFF_MEASURES
                 cutoff = None
             self.measures_arg.append((SUPPORTED_MEASURES.index(measure), cutoff))
-        assert max_cutoff <= 20, "ndeval only supports cutoffs up to 20"
+        assert max_cutoff <= 100, "ndeval only supports cutoffs up to 100"
         self.qrels = _coerce_qrels(qrels, max_cutoff, relevance_level, alpha, beta)
         self.measures = measures
         self.relevance_level = relevance_level

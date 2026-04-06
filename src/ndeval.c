@@ -40,13 +40,13 @@ char *helpText =
 "  the sense of Agrawal et al. (WSDM 20009). Normalization may be collection\n"
 "  dependent or collection independent.\n"
 "\n"
-"    ERR-IA@k for k = 5, 10 and 20\n"
+"    ERR-IA@k for k = 5, 10, 20, 50, and 100\n"
 "      Chapelle et al. (CIKM 2009) with collection-independent normalization\n"
-"    nERR-IA@k for k = 5, 10 and 20\n"
+"    nERR-IA@k for k = 5, 10, 20, 50, and 100\n"
 "      Chapelle et al. (CIKM 2009) with collection-dependent normalization\n"
-"    alpha-DCG@k for k = 5, 10 and 20\n"
+"    alpha-DCG@k for k = 5, 10, 20, 50, and 100\n"
 "      Clarke et al. (SIGIR 2008) with collection-independent normalization\n"
-"    alpha-nDCG@k for k = 5, 10 and 20\n"
+"    alpha-nDCG@k for k = 5, 10, 20, 50, and 100\n"
 "      Clarke et al., SIGIR 2008 with collection-dependent normalization\n"
 "    NRBP\n"
 "      Clarke et al. (ICTIR 2009) with collection-independent normalization\n"
@@ -54,9 +54,9 @@ char *helpText =
 "      Clarke et al. (ICTIR 2009) with collection-dependent normalization\n"
 "    MAP-IA\n"
 "      intent aware mean average precision\n"
-"    P-IA@k for k = 5, 10, 20\n"
+"    P-IA@k for k = 5, 10, 20, 50, and 100\n"
 "      intent aware precision@k\n"
-"    strec@k for k = 5, 10, 20\n"
+"    strec@k for k = 5, 10, 20, 50, and 100\n"
 "      subtopic recall (the number of subtopics covered by the top k docs)\n";
 
 #include <stdio.h>
@@ -66,7 +66,7 @@ char *helpText =
 #include <math.h>
 #include <ctype.h>
 
-#define DEPTH 20  /* max depth for computing alpha-ndcg, precision-ia, etc. */
+#define DEPTH 100  /* max depth for computing alpha-ndcg, precision-ia, etc. */
 #define ALPHA 0.5 /* default alpha value for alpha-nDCG and NRBP */
 #define BETA  0.5 /* default beta value for NRBP */
 
@@ -1219,25 +1219,25 @@ struct rList *rl, int rTopics, int actualTopics, char *runid, int AvgOverAllTopi
   )
 { 
 int i, j, nexti, nextj, numTopics;
-  double totalERR5 = 0.0, totalERR10 = 0.0, totalERR20 = 0.0;
-  double totalnERR5 = 0.0, totalnERR10 = 0.0, totalnERR20 = 0.0;
-  double totalDCG5 = 0.0, totalDCG10 = 0.0, totalDCG20 = 0.0;
-  double totalnDCG5 = 0.0, totalnDCG10 = 0.0, totalnDCG20 = 0.0;
+double totalERR5 = 0.0, totalERR10 = 0.0, totalERR20 = 0.0, totalERR50 = 0.0, totalERR100 = 0.0;
+double totalnERR5 = 0.0, totalnERR10 = 0.0, totalnERR20 = 0.0, totalnERR50 = 0.0, totalnERR100 = 0.0;
+double totalDCG5 = 0.0, totalDCG10 = 0.0, totalDCG20 = 0.0, totalDCG50 = 0.0, totalDCG100 = 0.0;
+double totalnDCG5 = 0.0, totalnDCG10 = 0.0, totalnDCG20 = 0.0, totalnDCG50 = 0.0, totalnDCG100 = 0.0;
   double totalNRBP = 0.0, totalnNRBP = 0.0;
   double totalMAPIA = 0.0;
-  double totalP5 = 0.0, totalP10 = 0.0, totalP20 = 0.0;
-  double totalSTRec5 = 0.0, totalSTRec10 = 0.0, totalSTRec20 = 0.0;
+  double totalP5 = 0.0, totalP10 = 0.0, totalP20 = 0.0, totalP50 = 0.0, totalP100 = 0.0;
+  double totalSTRec5 = 0.0, totalSTRec10 = 0.0, totalSTRec20 = 0.0, totalSTRec50 = 0.0, totalSTRec100 = 0.0;
   char * runstring = NULL;
 
   printf ("runid,topic");
-  printf (",ERR-IA@5,ERR-IA@10,ERR-IA@20");
-  printf (",nERR-IA@5,nERR-IA@10,nERR-IA@20");
-  printf (",alpha-DCG@5,alpha-DCG@10,alpha-DCG@20");
-  printf (",alpha-nDCG@5,alpha-nDCG@10,alpha-nDCG@20");
+  printf (",ERR-IA@5,ERR-IA@10,ERR-IA@20,ERR-IA@50,ERR-IA@100");
+  printf (",nERR-IA@5,nERR-IA@10,nERR-IA@20,nERR-IA@50,nERR-IA@100");
+  printf (",alpha-DCG@5,alpha-DCG@10,alpha-DCG@20,alpha-DCG@50,alpha-DCG@100");
+  printf (",alpha-nDCG@5,alpha-nDCG@10,alpha-nDCG@20,alpha-nDCG@50,alpha-nDCG@100");
   printf (",NRBP,nNRBP");
   printf (",MAP-IA");
-  printf (",P-IA@5,P-IA@10,P-IA@20");
-  printf (",strec@5,strec@10,strec@20");
+  printf (",P-IA@5,P-IA@10,P-IA@20,P-IA@50,P-IA@100");
+  printf (",strec@5,strec@10,strec@20,strec@50,strec@100");
   printf ("\n");
 
   int ZeroBaseline = 0;
@@ -1320,47 +1320,68 @@ int i, j, nexti, nextj, numTopics;
     printf (
       "%s,%d"
       ",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f"
+      ",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f"
       ",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n",
       runstring, topic,
         RiskBased(TopicVal(ZeroRun,rl[i].err[4]),TopicVal(ZeroBase,bl[j].err[4]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].err[9]),TopicVal(ZeroBase,bl[j].err[9]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].err[19]),TopicVal(ZeroBase,bl[j].err[19]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].err[49]),TopicVal(ZeroBase,bl[j].err[49]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].err[99]),TopicVal(ZeroBase,bl[j].err[99]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].nerr[4]),TopicVal(ZeroBase,bl[j].nerr[4]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].nerr[9]),TopicVal(ZeroBase,bl[j].nerr[9]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].nerr[19]),TopicVal(ZeroBase,bl[j].nerr[19]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].nerr[49]),TopicVal(ZeroBase,bl[j].nerr[49]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].nerr[99]),TopicVal(ZeroBase,bl[j].nerr[99]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].dcg[4]),TopicVal(ZeroBase,bl[j].dcg[4]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].dcg[9]),TopicVal(ZeroBase,bl[j].dcg[9]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].dcg[19]),TopicVal(ZeroBase,bl[j].dcg[19]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].dcg[49]),TopicVal(ZeroBase,bl[j].dcg[49]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].dcg[99]),TopicVal(ZeroBase,bl[j].dcg[99]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].ndcg[4]),TopicVal(ZeroBase,bl[j].ndcg[4]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].ndcg[9]),TopicVal(ZeroBase,bl[j].ndcg[9]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].ndcg[19]),TopicVal(ZeroBase,bl[j].ndcg[19]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].ndcg[49]),TopicVal(ZeroBase,bl[j].ndcg[49]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].ndcg[99]),TopicVal(ZeroBase,bl[j].ndcg[99]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].nrbp),TopicVal(ZeroBase,bl[j].nrbp), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].nnrbp),TopicVal(ZeroBase,bl[j].nnrbp), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].mapIA),TopicVal(ZeroBase,bl[j].mapIA), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].precision[4]),TopicVal(ZeroBase,bl[j].precision[4]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].precision[9]),TopicVal(ZeroBase,bl[j].precision[9]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].precision[19]),TopicVal(ZeroBase,bl[j].precision[19]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].precision[49]),TopicVal(ZeroBase,bl[j].precision[49]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].precision[99]),TopicVal(ZeroBase,bl[j].precision[99]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].strec[4]),TopicVal(ZeroBase,bl[j].strec[4]), riskAlpha),
         RiskBased(TopicVal(ZeroRun,rl[i].strec[9]),TopicVal(ZeroBase,bl[j].strec[9]), riskAlpha),
-        RiskBased(TopicVal(ZeroRun,rl[i].strec[19]),TopicVal(ZeroBase,bl[j].strec[19]), riskAlpha)
+      RiskBased(TopicVal(ZeroRun,rl[i].strec[19]),TopicVal(ZeroBase,bl[j].strec[19]), riskAlpha),
+      RiskBased(TopicVal(ZeroRun,rl[i].strec[49]),TopicVal(ZeroBase,bl[j].strec[49]), riskAlpha),
+        RiskBased(TopicVal(ZeroRun,rl[i].strec[99]),TopicVal(ZeroBase,bl[j].strec[99]), riskAlpha)
      );
      totalERR5 += RiskBased(TopicVal(ZeroRun,rl[i].err[4]),TopicVal(ZeroBase,bl[j].err[4]), riskAlpha);
      totalERR10 += RiskBased(TopicVal(ZeroRun,rl[i].err[9]),TopicVal(ZeroBase,bl[j].err[9]), riskAlpha);
      totalERR20 += RiskBased(TopicVal(ZeroRun,rl[i].err[19]),TopicVal(ZeroBase,bl[j].err[19]), riskAlpha);
+     totalERR50 += RiskBased(TopicVal(ZeroRun,rl[i].err[49]),TopicVal(ZeroBase,bl[j].err[49]), riskAlpha);
+     totalERR100 += RiskBased(TopicVal(ZeroRun,rl[i].err[99]),TopicVal(ZeroBase,bl[j].err[99]), riskAlpha);
      
 
      totalnERR5 += RiskBased(TopicVal(ZeroRun,rl[i].nerr[4]),TopicVal(ZeroBase,bl[j].nerr[4]), riskAlpha);
      totalnERR10 += RiskBased(TopicVal(ZeroRun,rl[i].nerr[9]),TopicVal(ZeroBase,bl[j].nerr[9]), riskAlpha);
      totalnERR20 += RiskBased(TopicVal(ZeroRun,rl[i].nerr[19]),TopicVal(ZeroBase,bl[j].nerr[19]), riskAlpha);
+     totalnERR50 += RiskBased(TopicVal(ZeroRun,rl[i].nerr[49]),TopicVal(ZeroBase,bl[j].nerr[49]), riskAlpha);
+     totalnERR100 += RiskBased(TopicVal(ZeroRun,rl[i].nerr[99]),TopicVal(ZeroBase,bl[j].nerr[99]), riskAlpha);
     
      totalDCG5 += RiskBased(TopicVal(ZeroRun,rl[i].dcg[4]),TopicVal(ZeroBase,bl[j].dcg[4]), riskAlpha);
      totalDCG10 += RiskBased(TopicVal(ZeroRun,rl[i].dcg[9]),TopicVal(ZeroBase,bl[j].dcg[9]), riskAlpha);
      totalDCG20 += RiskBased(TopicVal(ZeroRun,rl[i].dcg[19]),TopicVal(ZeroBase,bl[j].dcg[19]), riskAlpha);
+     totalDCG50 += RiskBased(TopicVal(ZeroRun,rl[i].dcg[49]),TopicVal(ZeroBase,bl[j].dcg[49]), riskAlpha);
+     totalDCG100 += RiskBased(TopicVal(ZeroRun,rl[i].dcg[99]),TopicVal(ZeroBase,bl[j].dcg[99]), riskAlpha);
     
 
      totalnDCG5 += RiskBased(TopicVal(ZeroRun,rl[i].ndcg[4]),TopicVal(ZeroBase,bl[j].ndcg[4]), riskAlpha);
      totalnDCG10 += RiskBased(TopicVal(ZeroRun,rl[i].ndcg[9]),TopicVal(ZeroBase,bl[j].ndcg[9]), riskAlpha);
      totalnDCG20 += RiskBased(TopicVal(ZeroRun,rl[i].ndcg[19]),TopicVal(ZeroBase,bl[j].ndcg[19]), riskAlpha);
+     totalnDCG50 += RiskBased(TopicVal(ZeroRun,rl[i].ndcg[49]),TopicVal(ZeroBase,bl[j].ndcg[49]), riskAlpha);
+     totalnDCG100 += RiskBased(TopicVal(ZeroRun,rl[i].ndcg[99]),TopicVal(ZeroBase,bl[j].ndcg[99]), riskAlpha);
 
 
      totalNRBP += RiskBased(TopicVal(ZeroRun,rl[i].nrbp),TopicVal(ZeroBase,bl[j].nrbp), riskAlpha);
@@ -1371,10 +1392,14 @@ int i, j, nexti, nextj, numTopics;
      totalP5 += RiskBased(TopicVal(ZeroRun,rl[i].precision[4]),TopicVal(ZeroBase,bl[j].precision[4]), riskAlpha);
      totalP10 += RiskBased(TopicVal(ZeroRun,rl[i].precision[9]),TopicVal(ZeroBase,bl[j].precision[9]), riskAlpha);
      totalP20 += RiskBased(TopicVal(ZeroRun,rl[i].precision[19]),TopicVal(ZeroBase,bl[j].precision[19]), riskAlpha);
+     totalP50 += RiskBased(TopicVal(ZeroRun,rl[i].precision[49]),TopicVal(ZeroBase,bl[j].precision[49]), riskAlpha);
+     totalP100 += RiskBased(TopicVal(ZeroRun,rl[i].precision[99]),TopicVal(ZeroBase,bl[j].precision[99]), riskAlpha);
 
      totalSTRec5 += RiskBased(TopicVal(ZeroRun,rl[i].strec[4]),TopicVal(ZeroBase,bl[j].strec[4]), riskAlpha);
      totalSTRec10 += RiskBased(TopicVal(ZeroRun,rl[i].strec[9]),TopicVal(ZeroBase,bl[j].strec[9]), riskAlpha);
      totalSTRec20 += RiskBased(TopicVal(ZeroRun,rl[i].strec[19]),TopicVal(ZeroBase,bl[j].strec[19]), riskAlpha);
+     totalSTRec50 += RiskBased(TopicVal(ZeroRun,rl[i].strec[49]),TopicVal(ZeroBase,bl[j].strec[49]), riskAlpha);
+     totalSTRec100 += RiskBased(TopicVal(ZeroRun,rl[i].strec[99]),TopicVal(ZeroBase,bl[j].strec[99]), riskAlpha);
 
      i = nexti;
      j = nextj;
@@ -1390,17 +1415,17 @@ int i, j, nexti, nextj, numTopics;
 
   printf (
     "%s,amean"
-    ",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f"
+    ",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f"
     ",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n",
     runstring,
-    totalERR5/actualTopics, totalERR10/actualTopics, totalERR20/actualTopics,
-    totalnERR5/actualTopics, totalnERR10/actualTopics, totalnERR20/actualTopics,
-    totalDCG5/actualTopics, totalDCG10/actualTopics, totalDCG20/actualTopics,
-    totalnDCG5/actualTopics, totalnDCG10/actualTopics, totalnDCG20/actualTopics,
+    totalERR5/actualTopics, totalERR10/actualTopics, totalERR20/actualTopics, totalERR50/actualTopics,totalERR100/actualTopics,
+    totalnERR5/actualTopics, totalnERR10/actualTopics, totalnERR20/actualTopics, totalnERR50/actualTopics,totalnERR100/actualTopics,
+    totalDCG5/actualTopics, totalDCG10/actualTopics, totalDCG20/actualTopics,totalDCG50/actualTopics,totalDCG100/actualTopics,
+    totalnDCG5/actualTopics, totalnDCG10/actualTopics, totalnDCG20/actualTopics,totalnDCG50/actualTopics,totalnDCG100/actualTopics,
     totalNRBP/actualTopics, totalnNRBP/actualTopics,
     totalMAPIA/actualTopics, 
-    totalP5/actualTopics, totalP10/actualTopics, totalP20/actualTopics,
-    totalSTRec5/actualTopics,totalSTRec10/actualTopics,totalSTRec20/actualTopics
+    totalP5/actualTopics, totalP10/actualTopics, totalP20/actualTopics,totalP50/actualTopics,totalP100/actualTopics,
+    totalSTRec5/actualTopics,totalSTRec10/actualTopics,totalSTRec20/actualTopics,totalSTRec50/actualTopics,totalSTRec100/actualTopics
     );
   free(runstring);
 }
